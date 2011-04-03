@@ -14,11 +14,16 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from gettext import ngettext
 import argparse, sys
+argparse.ngettext = ngettext
 from pyrite.commands import standard_commands
 from pyrite import HelpError
 
 class ExceptionalArgumentParser(argparse.ArgumentParser):
+    def print_help(self):
+        self.error(None)
+
     def error(self, message):
         cmd = self.get_default('command')
         module = self.get_default('module')
@@ -30,19 +35,24 @@ def run():
     try:
         parser = ExceptionalArgumentParser(prog='Pyrite')
         # add debug arguments
-        subparsers = parser.add_subparsers(title='commands', description='The most common commands are:')
+        subparsers = parser.add_subparsers(title='commands',
+                                description='The most common commands are:')
         for name in sorted(standard_commands):
             params = standard_commands[name]
-            p = subparsers.add_parser(name, help=params['help'], aliases=params['aliases'])
+            p = subparsers.add_parser(name, help=params['help'],
+                                    aliases=params['aliases'])
             for flags, flag_params in params['arguments']:
                 p.add_argument(*flags, **flag_params)
             p.set_defaults(module=params['module'], command=name)
         ns = parser.parse_args()
+        mod = __import__('pyrite.commands.' + ns.module, fromlist=['Command'])
+        cmd = mod.Command(ns, sys.stdout, None, None)
+        cmd.run()
     except HelpError as e:
         import pyrite.commands.help_command as help_command
         # get version string
         version = '.1'
-        help = help_command.HelpCommand(e.namespace, sys.stderr, None, None)
+        help = help_command.Command(e.namespace, sys.stderr, None, None)
         help.set_version(version)
         help.run()
 

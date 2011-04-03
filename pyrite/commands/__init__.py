@@ -26,7 +26,7 @@ class AbstractCommand(object):
 
 standard_commands = {
     'status': {
-        'aliases': [],
+        'aliases': ['st'],
         'arguments': [
           (('-c', '--color'), {'help': 'Enable color display.'}),
           (('--amend',), {'help': 'Show what would an ammended commit would do.'})
@@ -38,7 +38,8 @@ standard_commands = {
     'help': {
         'aliases': [],
         'arguments': [
-            (('-v', '--verbose'), {'help': 'Print full help and aliases.'}),
+            (['-v', '--verbose'], {'help': 'Print full help and aliases.',
+                                   'action': 'store_true'}),
         ],
         'module': 'help_command',
         'help': 'View the general help or help for a command.',

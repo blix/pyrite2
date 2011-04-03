@@ -18,7 +18,7 @@ from pyrite.commands import AbstractCommand, standard_commands
 
 help_string = 'Pyrite Distributed SCM (git based)'
 
-class HelpCommand(AbstractCommand):
+class Command(AbstractCommand):
     """
     pyt help <command>
     
@@ -42,19 +42,41 @@ class HelpCommand(AbstractCommand):
         self.stream.write(help_string + ' version: ' + self.version)
         self.stream.write('\n\n')
 
-    def print_generic_help(self):
+    def print_simple_list(self, full):
+        for name in sorted(standard_commands):
+            params = standard_commands[name]
+            if full or params['shortlist']:
+                format = ' {0:<10}: {help}\n'
+                self.stream.write(format.format(name, **params))
+
+    def print_extended_list(self):
+        for name in sorted(standard_commands):
+            params = standard_commands[name]
+            format = '{}'
+            l = len(params['aliases'])
+            if l:
+                format = '{0} ({1}{2})'.format(format, '{},' * (l - 1), '{}')
+            format += ':\n\t{help}\n'
+            self.stream.write(format.format(name, *params['aliases'], **params))
+
+    def print_generic_help(self, full=False):
         self.print_header()
         
         self.stream.write('Basic commands...\n')
-        for name in sorted(standard_commands):
-            params = standard_commands[name]
-            if self.ns.verbose or params['shortlist']:
-                print(' {0:<10}: {1}'.format(name, params['help']))
+        if self.ns.verbose:
+            self.print_extended_list()
+        else:
+            self.print_simple_list(full)        
         self.stream.write('\n')
-        if not self.ns.verbose:
+        if not full:
             self.stream.write('For more commands use "pyt help"\n')
+        elif not self.ns.verbose:
+            self.stream.write('For a full list including aliases use '
+                              '"pyt help -v"\n')
         self.stream.write('For more information on a specific command use'
                           ' "pyt help <command>"\n\n')
 
-    def print_command_help():
-        pass
+    def print_command_help(self):
+        if self.ns.command == 'help':
+            self.print_generic_help(True)
+            return
