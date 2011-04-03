@@ -1,0 +1,14 @@
+*.so
+*.py[cod]
+*.bak
+*.kpf
+*.komodoproject
+pyt-profile
+build/
+lib/
+dist/
+pyrite/__version__.py
+test/testdata/
+STATS
+*~
+*.orig
