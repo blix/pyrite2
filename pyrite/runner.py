@@ -16,21 +16,27 @@
 
 import argparse, sys
 from pyrite.commands import standard_commands
+from utils.help import HelpError
 
+class ExceptionalArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        cmd = self.get_default('command')
+        raise HelpError(cmd=cmd, message=message, verbose=False)
 
 def run():
-    parser = argparse.ArgumentParser(prog='Pyrite')
-    # add debug arguments
-    subparsers = parser.add_subparsers(title='commands', description='The most common commands are:')
-    for name in sorted(standard_commands):
-        params = standard_commands[name]
-        p = subparsers.add_parser(name, help=params['help'], aliases=params['aliases'])
-        for arg in params['arguments']:
-            p.add_argument(*arg)
-        p.set_defaults(module=params['module'])
-    if len(sys.argv) < 2:
-        parser.print_help()
-    else:
-        parser.parse_args()
+    try:
+        parser = ExceptionalArgumentParser(prog='Pyrite')
+        # add debug arguments
+        subparsers = parser.add_subparsers(title='commands', description='The most common commands are:')
+        for name in sorted(standard_commands):
+            params = standard_commands[name]
+            p = subparsers.add_parser(name, help=params['help'], aliases=params['aliases'])
+            for arg in params['arguments']:
+                p.add_argument(*arg)
+            p.set_defaults(module=params['module'], command=name)
+        ns = parser.parse_args()
+    except HelpError as e:
+        print('help for %s (%r)' % (e.cmd, e.message))
+        pass
 
     
