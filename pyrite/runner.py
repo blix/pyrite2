@@ -16,12 +16,15 @@
 
 import argparse, sys
 from pyrite.commands import standard_commands
-from utils.help import HelpError
+from pyrite import HelpError
 
 class ExceptionalArgumentParser(argparse.ArgumentParser):
     def error(self, message):
         cmd = self.get_default('command')
-        raise HelpError(cmd=cmd, message=message, verbose=False)
+        module = self.get_default('module')
+        raise HelpError(argparse.Namespace(command=cmd,
+                                           module=module,
+                                           verbose=False))
 
 def run():
     try:
@@ -31,12 +34,16 @@ def run():
         for name in sorted(standard_commands):
             params = standard_commands[name]
             p = subparsers.add_parser(name, help=params['help'], aliases=params['aliases'])
-            for arg in params['arguments']:
-                p.add_argument(*arg)
+            for flags, flag_params in params['arguments']:
+                p.add_argument(*flags, **flag_params)
             p.set_defaults(module=params['module'], command=name)
         ns = parser.parse_args()
     except HelpError as e:
-        print('help for %s (%r)' % (e.cmd, e.message))
-        pass
+        import pyrite.commands.help_command as help_command
+        # get version string
+        version = '.1'
+        help = help_command.HelpCommand(e.namespace, sys.stderr, None, None)
+        help.set_version(version)
+        help.run()
 
     

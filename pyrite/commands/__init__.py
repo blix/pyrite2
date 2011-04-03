@@ -14,14 +14,34 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+class AbstractCommand(object):
+    def __init__(self, namespace, stream, config, repo):
+        self.ns = namespace
+        self.stream = stream
+        self.config = config
+        self.repo = repo
+
+    def run(self):
+        pass
+
 standard_commands = {
     'status': {
         'aliases': [],
         'arguments': [
-          ('-c', '--color'),
-          ('--amend',),
+          (('-c', '--color'), {'help': 'Enable color display.'}),
+          (('--amend',), {'help': 'Show what would an ammended commit would do.'})
         ],
         'module': 'status',
         'help': 'Show status of the working set.',
+        'shortlist': True,
     },
+    'help': {
+        'aliases': [],
+        'arguments': [
+            (('-v', '--verbose'), {'help': 'Print full help and aliases.'}),
+        ],
+        'module': 'help_command',
+        'help': 'View the general help or help for a command.',
+        'shortlist': True,
+    }
 }
