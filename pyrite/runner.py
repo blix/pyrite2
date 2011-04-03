@@ -22,7 +22,11 @@ from pyrite import HelpError
 
 class ExceptionalArgumentParser(argparse.ArgumentParser):
     def print_help(self):
-        self.error(None)
+        module = self.get_default('module')
+        mod = __import__('pyrite.commands.' + module, fromlist=['Command'])
+        desc = mod.Command.__doc__
+        self.description = desc
+        argparse.ArgumentParser.print_help(self)
 
     def error(self, message):
         cmd = self.get_default('command')

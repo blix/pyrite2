@@ -28,8 +28,11 @@ standard_commands = {
     'status': {
         'aliases': ['st'],
         'arguments': [
-          (('-c', '--color'), {'help': 'Enable color display.'}),
-          (('--amend',), {'help': 'Show what would an ammended commit would do.'})
+          (('-c', '--color'), {'help': 'Enable color display.',
+                                   'action': 'store_true'}),
+          (('--amend',), {
+                    'help': 'Show what would an ammended commit would do.',
+                    'action': 'store_true'})
         ],
         'module': 'status',
         'help': 'Show status of the working set.',
