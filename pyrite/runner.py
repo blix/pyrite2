@@ -21,6 +21,16 @@ from pyrite.commands import standard_commands
 from pyrite import HelpError
 
 class ExceptionalArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args, **named):
+        stream = None
+        if 'stream' in named:
+            stream = named.pop('stream')
+        argparse.ArgumentParser.__init__(self, *args, **named)
+        self.eap_stream = stream
+
+    def _print_message(self, message, f):
+        print(message, file=self.eap_stream)
+
     def print_help(self):
         module = self.get_default('module')
         mod = __import__('pyrite.commands.' + module, fromlist=['Command'])
@@ -37,14 +47,15 @@ class ExceptionalArgumentParser(argparse.ArgumentParser):
 
 def run():
     try:
-        parser = ExceptionalArgumentParser(prog='Pyrite')
+        parser = ExceptionalArgumentParser(stream=sys.stderr, prog='Pyrite')
         # add debug arguments
         subparsers = parser.add_subparsers(title='commands',
                                 description='The most common commands are:')
         for name in sorted(standard_commands):
             params = standard_commands[name]
             p = subparsers.add_parser(name, help=params['help'],
-                                    aliases=params['aliases'])
+                                    aliases=params['aliases'],
+                                    stream=sys.stderr)
             for flags, flag_params in params['arguments']:
                 p.add_argument(*flags, **flag_params)
             p.set_defaults(module=params['module'], command=name)
