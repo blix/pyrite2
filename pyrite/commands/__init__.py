@@ -43,6 +43,7 @@ standard_commands = {
         'arguments': [
             (['-v', '--verbose'], {'help': 'Print full help and aliases.',
                                    'action': 'store_true'}),
+            (['subcommand'], {'help': 'Command to get help on.'}),
         ],
         'module': 'help_command',
         'help': 'View the general help or help for a command.',

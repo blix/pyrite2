@@ -20,14 +20,13 @@ help_string = 'Pyrite Distributed SCM (git based)'
 
 class Command(AbstractCommand):
     """
-    pyt help <command>
-    
-    Shows list of commands or help for a command.
+    Shows a list of commands or help for a command.
     """
 
     def __init__(self, *args, **named):
         AbstractCommand.__init__(self, *args, **named)
         self.version = ''
+        self.argparser = None
 
     def run(self):
         if not self.ns.command:
@@ -39,15 +38,14 @@ class Command(AbstractCommand):
         self.version = version
 
     def print_header(self):
-        self.stream.write(help_string + ' version: ' + self.version)
-        self.stream.write('\n\n')
+        print('{0} version: {1}\n'.format(help_string, self.version), file=self.stream)
 
     def print_simple_list(self, full):
         for name in sorted(standard_commands):
             params = standard_commands[name]
             if full or params['shortlist']:
-                format = ' {0:<10}: {help}\n'
-                self.stream.write(format.format(name, **params))
+                format = ' {0:<10}: {help}'
+                print(format.format(name, **params), file=self.stream)
 
     def print_extended_list(self):
         for name in sorted(standard_commands):
@@ -56,27 +54,32 @@ class Command(AbstractCommand):
             l = len(params['aliases'])
             if l:
                 format = '{0} ({1}{2})'.format(format, '{},' * (l - 1), '{}')
-            format += ':\n\t{help}\n'
-            self.stream.write(format.format(name, *params['aliases'], **params))
+            format += ':\n\t{help}'
+            print(format.format(name, *params['aliases'], **params),
+                  file=self.stream)
 
     def print_generic_help(self, full=False):
         self.print_header()
         
-        self.stream.write('Basic commands...\n')
+        print('Basic commands...', file=self.stream)
         if self.ns.verbose:
             self.print_extended_list()
         else:
             self.print_simple_list(full)        
-        self.stream.write('\n')
+        print('', file=self.stream)
         if not full:
-            self.stream.write('For more commands use "pyt help"\n')
+            print('For more commands use "pyt help"', file=self.stream)
         elif not self.ns.verbose:
-            self.stream.write('For a full list including aliases use '
-                              '"pyt help -v"\n')
-        self.stream.write('For more information on a specific command use'
-                          ' "pyt help <command>"\n\n')
+            print('For a full list including aliases use '
+                              '"pyt help -v"', file=self.stream)
+        print('For more information on a specific command use'
+                          ' "pyt help <command>"\n', file=self.stream)
+
+    def set_argparser(self, argparser):
+        self.argparser = argparser
 
     def print_command_help(self):
-        if self.ns.command == 'help':
+        if not self.ns.subcommand:
             self.print_generic_help(True)
-            return
+        else:
+            self.argparser.parse_args([self.ns.subcommand, '--help'])

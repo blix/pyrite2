@@ -62,6 +62,11 @@ def run():
         ns = parser.parse_args()
         mod = __import__('pyrite.commands.' + ns.module, fromlist=['Command'])
         cmd = mod.Command(ns, sys.stdout, None, None)
+        if ns.module == 'help_command':
+            # get version string
+            version = '.1'
+            cmd.set_version(version)
+            cmd.set_argparser(parser)
         cmd.run()
     except HelpError as e:
         import pyrite.commands.help_command as help_command
