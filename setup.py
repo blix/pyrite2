@@ -14,20 +14,15 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyrite.commands import AbstractCommand, standard_commands
-from pyrite.git.Repository import Repository
+from distutils.core import setup, Extension
 
-class Command(AbstractCommand):
-    """
-pyt status [options] [paths]...
+module1 = Extension('libgit2',
+                    sources = ['libgit2/repository.c',
+                               'libgit2/module.c',],
+                    library_dirs=['/usr/local/lib'],
+                    libraries = ['git2',],)
 
-The status command shows what the current state of the working directory is.
-It is useful to see what would be commited.  Passing the --amend option allows
-you to see what would happen if you did a checkin with the --amend flag.  Also
-like checkin, you can use paths to limit what is reported by status.
-
-    """
-
-    def run(self):
-        r = Repository()
-        print(dir(r))
+setup (name = 'libgit2',
+       version = '.1',
+       description = 'libgit2 for Python',
+       ext_modules = [module1])
